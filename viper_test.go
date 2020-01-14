@@ -8,6 +8,7 @@ package viper
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -26,11 +27,11 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"github.com/spf13/afero"
 	"github.com/spf13/cast"
-
 	"github.com/spf13/pflag"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
 
 var yamlExample = []byte(`Hacker: true
 name: steve
@@ -2103,6 +2104,34 @@ func TestKeyDelimiter(t *testing.T) {
 	assert.NoError(t, v.Unmarshal(&actual))
 
 	assert.Equal(t, expected, actual)
+}
+func TestViperArrayCaseInsensitive(t *testing.T) {
+	SetConfigType("yaml") // or viper.SetConfigType("YAML")
+
+	// any approach to require this configuration into your program.
+	var yamlExample = []byte(`
+Hacker: true
+name: steve
+hobbies:
+  - name: skateboarding
+    forWhat: fun
+  - name: go
+    forWhat: learning
+clothing:
+  jacket: leather
+  trousers: denim
+age: 35
+eyes : brown
+beard: true
+`)
+
+	err := ReadConfig(bytes.NewBuffer(yamlExample))
+	if err != nil {
+		t.Error(err)
+	}
+
+	hobbies := Get("hobbies")
+	fmt.Println(hobbies)
 }
 
 func BenchmarkGetBool(b *testing.B) {
